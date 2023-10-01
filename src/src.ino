@@ -2,6 +2,8 @@
 
 Arduboy2Base a;
 
+ARDUBOY_NO_USB;
+
 void setup()
 {
     a.boot();

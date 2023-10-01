@@ -1,9 +1,11 @@
 {
     "configuration": "core=arduboy-core,boot=cathy3k",
     "board": "arduboy-homemade:avr:arduboy-fx",
-    "sketch": "src\\src.ino",
+    "sketch": "src/src.ino",
     "output": "build/",
     "buildPreferences": [
-        ["build.extra_flags", "-mrelax"]
+        ["compiler.c.elf.extra_flags", "-Wl,--relax"],
+        ["compiler.c.extra_flags", "-mcall-prologues"],
+        ["compiler.cpp.extra_flags", "-mcall-prologues"]
     ]
 }
