@@ -1,0 +1,9 @@
+{
+    "configuration": "core=arduboy-core,boot=cathy3k",
+    "board": "arduboy-homemade:avr:arduboy-fx",
+    "sketch": "src\\src.ino",
+    "output": "build/",
+    "buildPreferences": [
+        ["build.extra_flags", "-mrelax"]
+    ]
+}
