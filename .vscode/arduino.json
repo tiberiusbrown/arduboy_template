@@ -4,8 +4,6 @@
     "sketch": "src/src.ino",
     "output": "build/",
     "buildPreferences": [
-        ["compiler.c.elf.extra_flags", "-Wl,--relax"],
-        ["compiler.c.extra_flags", "-mcall-prologues"],
-        ["compiler.cpp.extra_flags", "-mcall-prologues"]
+        ["compiler.c.elf.extra_flags", "-Wl,--relax"]
     ]
 }
