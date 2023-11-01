@@ -28,7 +28,7 @@ void loop()
     {
         //constexpr int F = rasty::FB_FRAC_COEF;
         constexpr int F = 1;
-        constexpr int X = 50;
+        constexpr int X = -50;
         constexpr int Y = 20;
         rasty::tri(
             {-25 * F + X, 0 + Y},

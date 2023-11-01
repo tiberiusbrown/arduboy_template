@@ -69,7 +69,8 @@ template<class T> [[gnu::always_inline]] T tmax(T a, T b, T c) { return tmax(tma
 static void vline(uint8_t x, int16_t y0, int16_t y1, uint8_t pati);
 static void tri_segment(int16_t ax, int16_t ay0, int16_t ay1, int16_t bx, int16_t by0, int16_t by1, uint8_t pati);
 
-__attribute__((used)) void tri(dvec2 v0, dvec2 v1, dvec2 v2, uint8_t pati)
+__attribute__((used))
+void tri(dvec2 v0, dvec2 v1, dvec2 v2, uint8_t pati)
 {
     //if(tmax(v0.y, v1.y, v2.y) < 0) return;
     if(int8_t(
@@ -187,18 +188,15 @@ void tri_segment(int16_t ax, int16_t ay0, int16_t ay1, int16_t bx, int16_t by0, 
         0x0000, 0x5500, 0x55aa, 0xffaa, 0xffff,
     };
     pat = pgm_read_word(&PATTERNS[pati]);
-    if(pxa & 1)
-    {
-        asm volatile(R"(
-                mov __tmp_reg__, %A[pat]
-                mov %A[pat], %B[pat]
-                mov %B[pat], __tmp_reg__
-            )"
-            : [pat] "+&r" (pat)
-            );
-    }
 
     asm volatile(R"(
+
+            sbrc %[pxa], 0
+            rjmp L%=_loop_start
+            mov __tmp_reg__, %A[pat]
+            mov %A[pat], %B[pat]
+            mov %B[pat], __tmp_reg__
+
         L%=_loop_start:
             cp   %[pxa], %[pxb]
             brne 1f
@@ -421,7 +419,7 @@ void tri_segment(int16_t ax, int16_t ay0, int16_t ay1, int16_t bx, int16_t by0, 
         );
 }
 
-constexpr uint16_t DIVISORS[257] PROGMEM =
+constexpr uint16_t DIVISORS[256] PROGMEM =
 {
     65535, 65535, 32767, 21845, 16383, 13107, 10922,  9362,
      8191,  7281,  6553,  5957,  5461,  5041,  4681,  4369,
@@ -455,7 +453,6 @@ constexpr uint16_t DIVISORS[257] PROGMEM =
       282,   281,   280,   278,   277,   276,   275,   274,
       273,   271,   270,   269,   268,   267,   266,   265,
       264,   263,   262,   261,   260,   259,   258,   257,
-      256,
 };
 
 uint16_t inv8(uint8_t x)
@@ -514,9 +511,10 @@ uint16_t inv16(uint16_t x)
     {
         uint24_t xy = uint24_t((uint32_t(y) * x) >> 8);
         // 2 - x * y
-        uint24_t t = uint24_t(0x20000) - xy;
+        //uint24_t t = uint24_t(0x20000) - xy;
+        uint24_t t = xy - uint24_t(0x20000);
         // y' = y * (2 - x * y)
-        y = uint16_t((uint32_t(t) * y) >> 16);
+        y = -uint16_t((uint32_t(t) * y) >> 16);
     }
     return y;
 }
@@ -527,7 +525,11 @@ int16_t interp(int16_t a, int16_t b, int16_t c, int16_t x, int16_t z)
 
     if(a == c) return x;
 
-    uint16_t xz = (x < z ? uint16_t(z - x) : uint16_t(x - z));
+    //uint16_t xz = (x < z ? uint16_t(z - x) : uint16_t(x - z));
+    uint16_t txz = uint16_t(z - x);
+    uint16_t xz = txz;
+    if((int16_t)txz < 0) xz = uint16_t(-xz);
+    
     uint32_t p = uint32_t(xz) * uint16_t(b - a);
     uint16_t ac = uint16_t(c - a);
     int16_t t;
@@ -543,7 +545,7 @@ int16_t interp(int16_t a, int16_t b, int16_t c, int16_t x, int16_t z)
         t = int16_t((p * i) >> 16);
     }
 
-    if(x > z) t = -t;
+    if((int16_t)txz < 0) t = -t;
     return x + t;
 }
 
